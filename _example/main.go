@@ -8,11 +8,12 @@ import (
 )
 
 type Config struct {
-	String string  `enfys:"STRING,required"`
-	Int    int     `enfys:"INT"`
-	Float  float64 `enfys:"FLOAT"`
-	Bool   bool    `enfys:"BOOL"`
-	Debug  bool    `enfys:"DEBUG"`
+	String  string  `enfys:"STRING,required"`
+	Int     int     `enfys:"INT"`
+	Float   float64 `enfys:"FLOAT"`
+	Bool    bool    `enfys:"BOOL"`
+	Debug   bool    `enfys:"DEBUG"`
+	Default string  `enfys:"DEFAULT" default:"default_value"`
 }
 
 func main() {

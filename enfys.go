@@ -80,7 +80,12 @@ func Fill(s any) error {
 				missing = append(missing, key)
 			}
 
-			continue
+			defaultTag := field.Tag.Get("default")
+			if defaultTag != "" {
+				envValue = defaultTag
+			} else {
+				continue
+			}
 		}
 
 		if !value.CanSet() {
