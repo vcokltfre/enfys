@@ -4,7 +4,29 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strings"
 )
+
+func splitTag(tag string) (string, bool, error) {
+	parts := strings.Split(tag, ",")
+	if len(parts) == 0 {
+		return "", false, fmt.Errorf("empty tag")
+	}
+
+	if len(parts) > 2 {
+		return "", false, fmt.Errorf("invalid tag format")
+	}
+
+	if len(parts) == 2 {
+		if parts[1] == "required" {
+			return parts[0], true, nil
+		} else {
+			return "", false, fmt.Errorf("unknown tag option: %s", parts[1])
+		}
+	}
+
+	return parts[0], false, nil
+}
 
 func isTrue(value string) bool {
 	accept := []string{
@@ -36,6 +58,8 @@ func Fill(s any) error {
 	t = t.Elem()
 	v = v.Elem()
 
+	missing := []string{}
+
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		value := v.Field(i)
@@ -45,8 +69,17 @@ func Fill(s any) error {
 			continue
 		}
 
-		envValue, exists := os.LookupEnv(envTag)
+		key, required, err := splitTag(envTag)
+		if err != nil {
+			return fmt.Errorf("invalid tag for field %s: %v", field.Name, err)
+		}
+
+		envValue, exists := os.LookupEnv(key)
 		if !exists {
+			if required {
+				missing = append(missing, key)
+			}
+
 			continue
 		}
 
@@ -76,6 +109,10 @@ func Fill(s any) error {
 		default:
 			return fmt.Errorf("unsupported field type %s for field %s", value.Kind(), field.Name)
 		}
+	}
+
+	if len(missing) > 0 {
+		return fmt.Errorf("missing required environment variables: %s", strings.Join(missing, ", "))
 	}
 
 	return nil

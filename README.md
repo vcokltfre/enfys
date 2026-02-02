@@ -15,7 +15,7 @@ import (
 )
 
 type Config struct {
-	String string  `enfys:"STRING"`
+	String string  `enfys:"STRING,required"`
 	Int    int     `enfys:"INT"`
 	Float  float64 `enfys:"FLOAT"`
 	Bool   bool    `enfys:"BOOL"`
